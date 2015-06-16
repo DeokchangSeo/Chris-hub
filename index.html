@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Movie Search</title>
+		<style type="text/css">
+			#header {
+				background-color:black;
+				color:white;
+				text-align:center;
+				padding:5px;
+				width:850px;
+			}
+			#nav {
+				line-height:30px;
+				background-color:#eeeeee;
+				height:600px;
+				width:200px;
+				float:left;
+				padding:5px; 
+			}
+			#section {
+				width:630px;
+				height:600px;
+				float:left;
+				padding:10px; 
+				overflow: scroll;
+			}
+			
+			#footer {
+				background-color:black;
+				color:white;
+				clear:both;
+				text-align:center;
+				padding:5px;
+				width:850px;
+			}
+			
+			table {
+				font-family: verdana,arial,sans-serif;
+				font-size:14px;
+				color:#333333;
+				border-width: 1px;
+				border-color: #a9c6c9;
+				border-collapse: collapse;
+			}
+			table tr {
+				border-width: 1px;
+				padding: 8px;
+				border-style: solid;
+				border-color: #a9c6c9;
+			}
+			table td {
+				border-width: 1px;
+				padding: 8px;
+				border-style: solid;
+				border-color: #a9c6c9;
+			}
+		</style>
+		<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+		<script type='text/javascript'>
+
+			var returndata
+			var page
+			
+			$(document).ready(function(){
+				$("#submit").click(function(){
+					var search = $("#search").val();
+					page = 1;		
+					var dataString = 'search='+ search + '&page=' + page;
+
+					// AJAX Code To Submit Form.
+					$.ajax({
+						type: "POST",
+						url: "searchMovie.php",
+						data: dataString,
+						cache: false,
+						success: function(data){
+							returndata = $.parseJSON(data);
+							loaddata(returndata);
+						}
+					});
+					return false;
+				});
+
+				$("#before").click(function() {
+					if (page > 1) {
+						var search = $("#search").val();
+						page--;
+
+						var dataString = 'search='+ search + '&page=' + page;
+
+						// AJAX Code To Submit Form.
+						$.ajax({
+							type: "POST",
+							url: "searchMovie.php",
+							data: dataString,
+							cache: false,
+							success: function(data){
+								returndata = $.parseJSON(data);
+								loaddata(returndata);
+							}
+						});
+						return false;
+					}
+				});
+
+				$("#next").click(function() {
+					if (page > 0 && page <= (returndata.total/30)) {
+						var search = $("#search").val();
+						page++;
+
+						var dataString = 'search='+ search + '&page=' + page;
+
+						// AJAX Code To Submit Form.
+						$.ajax({
+							type: "POST",
+							url: "searchMovie.php",
+							data: dataString,
+							cache: false,
+							success: function(data){
+								returndata = $.parseJSON(data);
+								loaddata(returndata);
+							}
+						});
+						return false;
+					}
+				});
+			});
+						
+			function loaddata(data) {
+				var movies = data.movies;
+				total = data.total;
+				
+				$('tr').remove();
+				$('p').remove();
+				$('#result').append('<p> Found ' + data.total + ' results for "' + search.value + '"</p>');
+
+				$('#movies').append('<thead align="center"><tr><td></td><td>Title</td><td>Year</td><td>Runtime (mins)</td></tr></thead><tbody></tbody>');
+				$.each(movies, function(index, movie) {
+					$('#movies').append('<tbody align="center"><tr><td>' + '<a href="' + movie.links.alternate + '"><img src="' + movie.posters.thumbnail + '" width=70 /></a>' + '</td><td width="400">' + movie.title + '</td><td width="100">' + movie.year + '</td><td width="100">' + movie.runtime + '</td></tr></tbody>');
+				});
+			};
+        </script>
+	</head>
+	<body>
+		<div id="header">
+			<h1>Movie Search</h1>
+		</div>
+		<div id="nav">
+			<div id="form">
+				<div>
+					<label>Input Keyword</label><br>
+					<input id="search" type="text">
+					<input id="submit" type="button" value="Send">
+				</div>
+				<div id="page">
+					<input type="button" id="before" value=Previous>
+					<input type="button" id="next" value=Next>
+				</div>
+			</div>
+			<div id="result"><p></p></div>
+		</div>
+		<div id="section">
+			<table id="movies"></table>
+		</div>
+		<div id="footer">
+			Designed by Chris Deokchang Seo
+		</div>
+	</body>
+</html>
